@@ -1,28 +1,78 @@
+import java.util.ArrayList;
+import java.util.HashMap;
+
 public class Hand {
-    private String[] Hand;
+    private ArrayList<String> hand;
+    private int points;
+
     public Hand() {
-        this.Hand = new String[10];
+        hand = new ArrayList<>();
+        points = 0;
     }
+
     public void addCard(String card) {
-        int index = 0;
-        // Checks if a card will replace an empty spot
-        for(int i = 0; i < this.Hand.length; i++) {
-            if(this.Hand[i]==null) {
-                index = i;
-                break;
+        hand.add(card);
+        checkForCompleteSet();
+    }
+
+    public boolean hasSuit(String suit) {
+        for (String card : hand) {
+            if (card.endsWith(suit)) {
+                return true;
             }
         }
-        this.Hand[index] = card;
+        return false;
     }
-    // Debug method to show what cards the player has
-    public void printHand() {
-        for (int i = 0; i < this.Hand.length; i++) {
-            System.out.println(this.Hand[i]);
+
+    public ArrayList<String> giveCards(String suit) {
+        ArrayList<String> givenCards = new ArrayList<>();
+        hand.removeIf(card -> {
+            if (card.endsWith(suit)) {
+                givenCards.add(card);
+                return true;
+            }
+            return false;
+        });
+        return givenCards;
+    }
+
+    private void checkForCompleteSet() {
+        HashMap<String, ArrayList<String>> rankGroups = new HashMap<>();
+
+        for (String card : hand) {
+            String rank = card.split("-")[0];
+            rankGroups.putIfAbsent(rank, new ArrayList<>());
+            rankGroups.get(rank).add(card);
+        }
+
+        for (String rank : rankGroups.keySet()) {
+            if (rankGroups.get(rank).size() == 4) {
+                System.out.println("Collected all suits of rank " + rank + "! +1 point.");
+                hand.removeAll(rankGroups.get(rank));
+                points++;
+            }
         }
     }
-    // public static void main(String[] args) {
-    //     Hand playerHand = new Hand();
-    //     playerDeck.initializeDeck();
-    //     playerDeck.printCards();
-    // }
+
+    public void printHand() {
+        System.out.println("Your hand: " + hand);
+    }
+
+    public int getPoints() {
+        return points;
+    }
+
+    public int getTotalCards() {
+        return hand.size();
+    }
+
+    // Method to discard a card
+    public void discardCard(String card) {
+        if (hand.contains(card)) {
+            hand.remove(card);
+            System.out.println("You discarded: " + card);
+        } else {
+            System.out.println("Card not found in your hand!");
+        }
+    }
 }
